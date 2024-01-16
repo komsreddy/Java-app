@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven3.9.6'
+    }
+
+    stages {
+        stage('Clone the Repository') {
+            steps {
+               git branch: 'build-and-push-to-jfrog-jenkinsfile', credentialsId: 'Github_credentials', url: 'https://github.com/komsreddy/Java-app.git'
+            }
+        }
+        stage('Build the code') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+          stage('Push the artifacts into Jfrog artifactory') {
+            steps {
+              rtUpload (
+                serverId: 'Jfrog-Dev-Instance',
+                spec: '''{
+                      "files": [
+                        {
+                          "pattern": "*.war",
+                           "target": "jenkins-repo/"
+                        }
+                    ]
+                }'''
+              )
+          }
+        }
+            }
+     }
+
+     
