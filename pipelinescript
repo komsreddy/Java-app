@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+    tools {
+        maven "Maven3.9.6"
+    }
+
+    stages {
+        
+        stage('Clone') {
+            steps {
+                git branch: 'pushing-docker-image-to-dockerhub-jenkinsfile', url: 'https://github.com/komsreddy/Java-app.git'
+            }
+        }
+    stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+   
+   stage('Build Docker Image') {
+            steps {
+                sh '''
+               docker build . --tag web-application:latest
+               docker tag web-application:latest indureddy12/web-application:latest
+                
+                '''
+
+            }
+             
+       }   
+       
+       stage('Push Docker Image') {
+            steps {
+                   withCredentials([usernamePassword(credentialsId: 'dockerid', passwordVariable: 'Dockerpass', usernameVariable: 'Dockerhubid')]) {
+       
+                    sh '''
+                    docker login -u $Dockerhubid -p $Dockerpass
+                        docker push indureddy12/web-application:latest
+                    '''
+                }
+            } 
+       }
+       
+    }
+}
+    
