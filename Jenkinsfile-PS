@@ -7,7 +7,7 @@ pipeline {
     stages {
         stage('Clone the Repository') {
             steps {
-               git branch: 'pushing-docker-image-to-ecr-jenkins-pipeline', credentialsId: 'Github_credentials', url: 'https://github.com/komsreddy/Java-app.git'
+               git branch: 'pushing-docker-image-to-ecr-jenkinsfile', credentialsId: 'Github_credentials', url: 'https://github.com/komsreddy/Java-app.git'
             }
         }
         stage('Build the code') {
