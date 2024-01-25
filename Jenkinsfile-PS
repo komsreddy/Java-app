@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven3.9.6'
+    }
+
+    stages {
+        stage('Clone the Repository') {
+            steps {
+               git branch: 'build-and-push-to-jfrog-jenkinsfile', credentialsId: 'Github_credentials', url: 'https://github.com/komsreddy/Java-app.git'
+            }
+        }
+        stage('Build the code') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+           stage('Build Docker Image') {
+            steps {
+                sh '''
+              docker build . --tag web-application:$BUILD_NUMBER
+              docker tag web-application:$BUILD_NUMBER 108290765801.dkr.ecr.us-east-1.amazonaws.com/java-application:$BUILD_NUMBER
+                
+                '''
+                
+            }
+        }  
+           stage('Push Docker Image') {
+           steps{
+              withAWS(credentials: 'AWS', region: 'us-east-1') {
+       
+                    sh '''
+                          docker login -u AWS -p eyJwYXlsb2FkIjoiQmJLL2ZnSWE1ZzA4Z3BsQ0xDRG54bUpOSU01NEpaSHlzWjFPb2ZDaGFVaFNZbmZzZVR3ajVzcFZTWXkvaWs1VmtDU0lFMzE5d2xvYlBsZlBHNjZqWFJET0loOUMwcWVRWThWZHhiTUhhR0NCb0NMSEU4eEx0UVpURjN4c1AybGRkNE9jV245YlJvTHBCNTJzTDRTemIwRnNQTnJqd3MxakVRL0phYU1oRjdWZ3U1RStNTzk4NDN0dWwxNUpMam5yTTJFMlFBTW9wWmRROVlzbk5CQ0hyUFVBZ3o1WDY5SkVvTmwxZ05tZk9UeldaQk9jUkZBUFBTNmUyelNOUEI0RnJId3NxNFd4dkhtaHBDVUI4VWtBTE9RNVFVdGZXRnRYV2R6bTVDNHVGVkJReVVnYng1Z3Y4WkNYTURqTko0S3dDdEZQWTJHVzFjaUlIUmsrUk9INGw1VjVGTEZLbVQ0akZwUUsyMlZmaDhZQWY0Vzd6Y2JYVk9qenFxWHprZlJmbGNuR25hbnNLbjdqbExoT3dhM2RBeStkSWZGU3Y3V3V5SmNlRUNQUFlpTnNOMWhReUN5UEtpV05ZWVA2T2NaUUJ0UEY2aWkrSU1aMTVzRHFORnNxbFVsN0NndTdHWnQxUEZKRGNBWU9UVWxuajd2b25UeE9RUnpTWlJaMUpheThsVzdPVUZ0dXNKNFNVNytGYk5iVTZnZE44YkJZOVhhWnZjd0d2VVh0ZzVnbFFvU0pxR1ExWC9ic1BvbmZmYWkwNG5udjFZSFpxR2YxRjRuVjlzc0pPUUpXa2o3S21WRFdWNGg0dFExNVpoM1llWWV5MzUxTkx4ZXpGS0pscFNwTkdyeFUyZmw0NHlLOG82NDl2aHRHa3IrTFgzQ2NUN0h4KzEyMTNnVEZTVTJWRXViL3hHbENkcEVsaEIyc3dkYkFad0tIOHNrUE5mRDJrRnNRV2F1MHBhM0lMM0tZMm0wUjltcXZuS3ZUakl2Tk9sbUx0K1ZGYkk5UVFzV2ZJK0gwcVl0L3paR1VYRCtsdXF2RjRuanQ5aEx1N2YzZzd2MzJ1cFp4bGRYTTNSdzZvQ0FGZXBKR0gzVlZxUVdVcnZBMHhPWUtKRVZoMFVRdmpJVUtZYk5GWENGSVpycm1LOTNWQmJDTGdyZ096OHVVbFJ6c20wMlVqKzRHSkR4cE1WWTUxajRXNDFlUS9mcjZhWXFGZ3VGTktBU2tpeDNVQVkwNnFDcXJZTkgzdEZkdWxlVkIwVG81UXNwUlJ6Skk1aXVhYmdiaHJ5YzRZWmFISUZCQ3pjdGdaVkZJdzBJcXRtelV0T0dMQVFIYm9aNjFvRzArVDFqTmp4N3lucURTdzdvZmxGcHN3ZExCYi9LUUhpakovMFB3QXd1SWZoZnZSRHlROFE9PSIsImRhdGFrZXkiOiJBUUVCQUhod20wWWFJU0plUnRKbTVuMUc2dXFlZWtYdW9YWFBlNVVGY2U5UnE4LzE0d0FBQUg0d2ZBWUpLb1pJaHZjTkFRY0dvRzh3YlFJQkFEQm9CZ2txaGtpRzl3MEJCd0V3SGdZSllJWklBV1VEQkFFdU1CRUVETEpLZjlXZVdHMGhTYWF5Y3dJQkVJQTd0SXlKc3YxWWdNU20vMjZDcWxiaXY0TUt3b3ZMQ2MreHVsazFuc1lSL1FBTjZ1UVorWXppc1lwRGlRWit3TFJhZ3JUS0grSUdkbUtTN1JNPSIsInZlcnNpb24iOiIyIiwidHlwZSI6IkRBVEFfS0VZIiwiZXhwaXJhdGlvbiI6MTcwNjI0NDg1N30=  https://382310521414.dkr.ecr.us-east-1.amazonaws.com
+                         docker push 382310521414.dkr.ecr.us-east-1.amazonaws.com/java-application:$BUILD_NUMBER
+                    '''
+                }
+            } 
+            
+      }
+
+      
+            }
+     }
+
+     
